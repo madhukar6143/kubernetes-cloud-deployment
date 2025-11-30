@@ -1,10 +1,30 @@
-- name: Deploy to OCI OKE
-  run: |
-    echo "${{ secrets.KUBECONFIG }}" > kubeconfig.yaml
-    export KUBECONFIG=$(pwd)/kubeconfig.yaml
+name: Auto Deploy to OCI OKE   # top-level key
 
-    # Test connection
-    kubectl get nodes
+on:                           # when the workflow runs
+  push:
+    branches:
+      - main
 
-    # Apply all YAML files safely
-    kubectl apply -f k8s/ --validate=false
+jobs:                          # top-level key
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
+
+      - name: Deploy to OCI OKE
+        run: |
+          echo "${{ secrets.KUBECONFIG }}" > kubeconfig.yaml
+          export KUBECONFIG=$(pwd)/kubeconfig.yaml
+
+          # Test connection
+          kubectl get nodes
+
+          # Apply all manifests in the k8s folder
+          kubectl apply -f k8s/ --validate=false
