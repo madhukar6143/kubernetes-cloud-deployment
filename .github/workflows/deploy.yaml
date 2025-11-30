@@ -20,12 +20,12 @@ jobs:
 
       - name: Deploy to OCI OKE
         run: |
-          echo "${{ secrets.KUBECONFIG }}" > kubeconfig.yml
-          export KUBECONFIG=$(pwd)/kubeconfig.yml
-          kubectl apply -f k8/deployment.yml
-          kubectl apply -f k8/service.yml
+          echo "${{ secrets.KUBECONFIG }}" > kubeconfig.yaml
+          export KUBECONFIG=$(pwd)/kubeconfig.yaml
+          kubectl apply -f k8/deployment.yaml
+          kubectl apply -f k8/service.yaml
 
           
-          if [ -f k8/ingress.yml ]; then
-            kubectl apply -f k8/ingress.yml
+          if [ -f k8/ingress.yaml ]; then
+            kubectl apply -f k8/ingress.yaml
           fi
