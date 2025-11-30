@@ -17,8 +17,12 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Log in to OCI Registry
+        env:
+          OCIR_AUTH: ${{ secrets.OCIR_AUTH }}
         run: |
-          echo "${{ secrets.OCIR_AUTH }}" | docker login iad.ocir.io -u 'idbjsjqzktkm/oracleidentitycloudservice/<username>' --password-stdin
+          echo $OCIR_AUTH | docker login iad.ocir.io \
+            -u "idbjsjqzktkm/oracleidentitycloudservice/madhukar.eppalapelly@gmail.com" \
+            --password-stdin
 
       - name: Build and Push Docker Image
         run: |
