@@ -27,7 +27,7 @@ jobs:
 
       - name: Log in to OCI Registry
         run: |
-          echo "${{ secrets.OCIR_PASSWORD  }}" | docker login iad.ocir.io \
+          echo "90O{d9Jxg_rYtVn6:IoF" | docker login iad.ocir.io \
             -u "idbjsjqzktkm/oracleidentitycloudservice/madhukar.eppalapelly@gmail.com" \
             --password-stdin
 
