@@ -27,10 +27,8 @@ jobs:
 
       - name: Log in to OCI Registry
         run: |
-          echo "90O{d9Jxg_rYtVn6:IoF" | docker login iad.ocir.io \
-            -u "idbjsjqzktkm/oracleidentitycloudservice/madhukar.eppalapelly@gmail.com" \
-            --password-stdin
-
+          docker login iad.ocir.io -u "idbjsjqzktkm/madhukar.eppalapelly@gmail.com" -p "90O{d9Jxg_rYtVn6:IoF"
+          
       - name: Build and Push Docker Image
         run: |
           docker build -t iad.ocir.io/idbjsjqzktkm/react-app:latest .
