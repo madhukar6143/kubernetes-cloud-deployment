@@ -32,9 +32,7 @@ jobs:
           docker build -t $IMAGE .
           docker push $IMAGE
 
-      # 5. Install kubectl
-      - name: Install kubectl
-        uses: azure/setup-kubectl@v3
+
 
       - name: Install OCI CLI
         run: |
@@ -43,12 +41,16 @@ jobs:
           ./install.sh --accept-all-defaults
           echo "$HOME/bin" >> $GITHUB_PATH
 
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: "1.30.0"
+
       - name: Configure kubectl for OKE
-        uses: oracle-actions/configure-kubectl-oke@v1.4.0
+        uses: oracle-actions/configure-kubectl-oke@v1.5.0
         with:
           cluster: ${{ secrets.OCI_CLUSTER_ID }}
           enablePrivateEndpoint: false
-          kubectl-version: v1.30.0   # <--- IMPORTANT FIX
         env:
           OCI_CLI_USER:        ${{ secrets.OCI_USER_OCID }}
           OCI_CLI_TENANCY:     ${{ secrets.OCI_TENANCY_OCID }}
