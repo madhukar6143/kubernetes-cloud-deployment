@@ -36,16 +36,6 @@ jobs:
           docker build -t iad.ocir.io/idbjsjqzktkm/react-app:latest .
           docker push iad.ocir.io/idbjsjqzktkm/react-app:latest
 
-      #####################################################
-      #  FIX: Install OCI CLI so kubeconfig exec plugin works
-      #####################################################
-      - name: Install OCI CLI
-        run: |
-          curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh -o install.sh
-          chmod +x install.sh
-          ./install.sh --accept-all-defaults
-          echo "$HOME/bin" >> $GITHUB_PATH
-
       - name: Set up kubectl
         uses: azure/setup-kubectl@v3
         with:
@@ -54,8 +44,14 @@ jobs:
       - name: Set up Kubeconfig
         run: |
           mkdir -p ~/.kube
-          echo "$KUBECONFIG_FILE" > ~/.kube/config
+          # Use the kubeconfig content from a secret
+          echo '${{ secrets.KUBECONFIG }}' > ~/.kube/config
+          chmod 600 ~/.kube/config
+
+      - name: Verify Kubernetes Access
+        run: |
+          kubectl cluster-info
+          kubectl get nodes
 
       - name: Apply Manifests
         run: kubectl apply -f k8s/ --validate=false
-
