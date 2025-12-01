@@ -54,9 +54,9 @@ jobs:
       # 8. Verify Kubernetes access
       - name: Verify Kubernetes Access
         run: |
-          kubectl --kubeconfig=kubeconfig.yaml get nodes
+          kubectl  get nodes
 
       # 9. Apply manifests
       - name: Deploy to OKE
         run: |
-          kubectl --kubeconfig=kubeconfig.yaml apply -f k8s/ --validate=false
+          kubectl apply -f k8s/ --validate=false
