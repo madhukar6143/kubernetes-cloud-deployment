@@ -17,14 +17,6 @@ jobs:
       - name: Set up Docker
         uses: docker/setup-buildx-action@v3
 
-      - name: Debug secret length
-        run: |
-          if [ -z "${{ secrets.OCIR_PASSWORD }}" ]; then
-            echo "OCIR_PASSWORD is EMPTY"
-          else
-            echo "OCIR_PASSWORD is SET"
-          fi
-
       - name: Log in to OCI Registry
         run: |
           docker login iad.ocir.io \
@@ -40,6 +32,17 @@ jobs:
         uses: azure/setup-kubectl@v3
         with:
           version: 'latest'
+
+      - name: Install OCI CLI
+        run: |
+          # Install OCI CLI
+          curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh -o install.sh
+          chmod +x install.sh
+          ./install.sh --accept-all-defaults
+          echo "$HOME/bin" >> $GITHUB_PATH
+          
+          # Verify installation
+          oci --version
 
       - name: Set up Kubeconfig
         run: |
