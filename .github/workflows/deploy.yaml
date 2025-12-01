@@ -2,65 +2,40 @@ name: Deploy React App to OCI OKE
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: Oracle
+    environment: Oracle  # <-- preserved here
 
     steps:
-      - name: Checkout code
+      - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Set up Docker
+      - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Log in to OCI Registry
+      - name: Login to OCIR
         run: |
           docker login iad.ocir.io \
             -u "idbjsjqzktkm/madhukar.eppalapelly@gmail.com" \
             -p "${{ secrets.OCIR_PASSWORD }}"
 
-      - name: Build and Push Docker Image
+      - name: Build & Push Docker Image
         run: |
-          docker build -t iad.ocir.io/idbjsjqzktkm/react-app:latest .
-          docker push iad.ocir.io/idbjsjqzktkm/react-app:latest
+          IMAGE=iad.ocir.io/idbjsjqzktkm/react-app:latest
+          docker build -t $IMAGE .
+          docker push $IMAGE
 
-      - name: Set up kubectl
+      - name: Install kubectl
         uses: azure/setup-kubectl@v3
-        with:
-          version: 'latest'
 
-      - name: Set up Kubeconfig with Debug
+      - name: Configure Kubeconfig
         run: |
-          mkdir -p ~/.kube
-          echo '${{ secrets.KUBECONFIG_CONTENT }}' > kubeconfig.yaml
+          echo "${{ secrets.KUBECONFIG_CONTENT }}" > kubeconfig.yaml
           chmod 600 kubeconfig.yaml
-          
-          # Debug: Check the kubeconfig
-          echo "=== Kubeconfig file created ==="
-          ls -la kubeconfig.yaml
-          echo "=== First few lines of kubeconfig ==="
-          head -20 kubeconfig.yaml
-          
-          # Set KUBECONFIG environment variable
           echo "KUBECONFIG=$PWD/kubeconfig.yaml" >> $GITHUB_ENV
 
-      - name: Verify Kubernetes Access
-        run: |
-          echo "=== Debug Information ==="
-          echo "KUBECONFIG is set to: $KUBECONFIG"
-          echo "Current directory: $(pwd)"
-          echo "=== Checking kubectl contexts ==="
-          kubectl config get-contexts
-          echo "=== Current context ==="
-          kubectl config current-context
-          echo "=== Testing cluster connection ==="
-          kubectl cluster-info
-          echo "=== Checking nodes ==="
-          kubectl get nodes
-
-      - name: Apply Manifests
-        run: kubectl apply -f k8s/ --validate=false
+      - name: Deploy to OKE
+        run: kubectl apply -f k8s/
