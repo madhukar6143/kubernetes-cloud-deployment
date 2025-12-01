@@ -2,12 +2,19 @@ name: Deploy React App to OCI OKE
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     environment: Oracle
+
+    env:
+      OCI_CLI_USER:        ${{ secrets.OCI_USER_OCID }}
+      OCI_CLI_TENANCY:     ${{ secrets.OCI_TENANCY_OCID }}
+      OCI_CLI_FINGERPRINT: ${{ secrets.OCI_FINGERPRINT }}
+      OCI_CLI_KEY_CONTENT: ${{ secrets.OCI_PRIVATE_KEY }}
+      OCI_CLI_REGION:      ${{ secrets.OCI_REGION }}
 
     steps:
       # 1. Checkout repository
@@ -21,50 +28,39 @@ jobs:
       # 3. Login to OCI Registry (OCIR)
       - name: Login to OCIR
         run: |
-          docker login iad.ocir.io \
+          echo "${{ secrets.OCIR_PASSWORD }}" | docker login iad.ocir.io \
             -u "idbjsjqzktkm/madhukar.eppalapelly@gmail.com" \
-            -p "${{ secrets.OCIR_PASSWORD }}"
+            --password-stdin
 
       # 4. Build & push Docker image
       - name: Build & Push Docker Image
         run: |
-          IMAGE=iad.ocir.io/idbjsjqzktkm/react-app:latest
-          docker build -t $IMAGE .
-          docker push $IMAGE
+          IMAGE_BASE=iad.ocir.io/idbjsjqzktkm/react-app
+          TAG=${GITHUB_SHA::7}
+          docker build -t $IMAGE_BASE:$TAG -t $IMAGE_BASE:latest .
+          docker push $IMAGE_BASE:$TAG
+          docker push $IMAGE_BASE:latest
 
-
-
-      - name: Install OCI CLI
-        run: |
-          curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh -o install.sh
-          chmod +x install.sh
-          ./install.sh --accept-all-defaults
-          echo "$HOME/bin" >> $GITHUB_PATH
-
+      # 5. Install kubectl (explicit version)
       - name: Install kubectl
         uses: azure/setup-kubectl@v4
         with:
-          version: v1.29.8   # or 'latest'
+          version: v1.29.8
 
+      # 6. Configure kubectl for OKE (generates kubeconfig + sets KUBECONFIG)
       - name: Configure kubectl for OKE
         uses: oracle-actions/configure-kubectl-oke@v1.5.0
         with:
           cluster: ${{ secrets.OCI_CLUSTER_ID }}
           enablePrivateEndpoint: false
-        env:
-          OCI_CLI_USER:        ${{ secrets.OCI_USER_OCID }}
-          OCI_CLI_TENANCY:     ${{ secrets.OCI_TENANCY_OCID }}
-          OCI_CLI_FINGERPRINT: ${{ secrets.OCI_FINGERPRINT }}
-          OCI_CLI_KEY_CONTENT: ${{ secrets.OCI_PRIVATE_KEY }}
-          OCI_CLI_REGION:      ${{ secrets.OCI_REGION }}
 
-
-      # 8. Verify Kubernetes access
+      # 7. Verify Kubernetes access
       - name: Verify Kubernetes Access
         run: |
-          kubectl  get nodes
+          echo "Using kubeconfig: $KUBECONFIG"
+          kubectl get nodes
 
-      # 9. Apply manifests
+      # 8. Deploy manifests
       - name: Deploy to OKE
         run: |
           kubectl apply -f k8s/ --validate=false
