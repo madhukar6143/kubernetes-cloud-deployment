@@ -15,6 +15,7 @@ jobs:
       OCI_CLI_FINGERPRINT: ${{ secrets.OCI_FINGERPRINT }}
       OCI_CLI_KEY_CONTENT: ${{ secrets.OCI_PRIVATE_KEY }}
       OCI_CLI_REGION:      ${{ secrets.OCI_REGION }}
+      IMAGE:               iad.ocir.io/idbjsjqzktkm/react-app:${{ github.sha }}
 
     steps:
       # 1. Checkout repository
@@ -32,17 +33,13 @@ jobs:
             -u "idbjsjqzktkm/madhukar.eppalapelly@gmail.com" \
             --password-stdin
 
-      # 4. Build & push Docker image tagged with Git SHA
+      # 4. Build & push Docker image
       - name: Build & Push Docker Image
         run: |
-          IMAGE=iad.ocir.io/idbjsjqzktkm/react-app:${{ github.sha }}
-          
           echo "Building image: $IMAGE"
           docker build -t $IMAGE .
-          
           echo "Pushing image..."
           docker push $IMAGE
-          
           echo "✅ Image pushed as: $IMAGE"
 
       # 5. Install kubectl
@@ -61,11 +58,11 @@ jobs:
       # 7. Update Kubernetes deployment to use new image
       - name: Update Deployment
         run: |
-          echo "Setting deployment image to ${IMAGE}"
+          echo "Setting deployment image to $IMAGE"
           kubectl set image deployment/react-app react-app=$IMAGE
           kubectl rollout status deployment/react-app
 
-      # 8. Optional: Verify
+      # 8. Verify deployment
       - name: Verify Deployment
         run: |
           kubectl get deploy react-app -o wide
