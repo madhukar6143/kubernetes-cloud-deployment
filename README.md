@@ -13,3 +13,6 @@ Type this into your terminal
 
     git clone https://github.com/madhukar6143/kubernetes-cloud-deployment
 
+    demo : http://129.80.129.148/
+    
+
