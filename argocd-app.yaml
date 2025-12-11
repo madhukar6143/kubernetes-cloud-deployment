@@ -8,7 +8,7 @@ spec:
     namespace: default
     server: https://kubernetes.default.svc
   source:
-    repoURL: https://github.com/madhukar6143/kubernetes-cloud-deploymenttt.git
+    repoURL: https://github.com/madhukar6143/kubernetes-cloud-deploymenttt
     targetRevision: main
     path: k8s
   project: default
