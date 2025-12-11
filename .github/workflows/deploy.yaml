@@ -42,29 +42,29 @@ jobs:
           docker push $IMAGE
           echo "✅ Image pushed as: $IMAGE"
 
-      # 5. Install kubectl
-      - name: Install kubectl
-        uses: azure/setup-kubectl@v4
-        with:
-          version: v1.29.8
+      # # 5. Install kubectl
+      # - name: Install kubectl
+      #   uses: azure/setup-kubectl@v4
+      #   with:
+      #     version: v1.29.8
 
-      # 6. Configure kubectl for OKE
-      - name: Configure kubectl for OKE
-        uses: oracle-actions/configure-kubectl-oke@v1.5.0
-        with:
-          cluster: ${{ secrets.OCI_CLUSTER_ID }}
-          enablePrivateEndpoint: false
+      # # 6. Configure kubectl for OKE
+      # - name: Configure kubectl for OKE
+      #   uses: oracle-actions/configure-kubectl-oke@v1.5.0
+      #   with:
+      #     cluster: ${{ secrets.OCI_CLUSTER_ID }}
+      #     enablePrivateEndpoint: false
 
-      # 7. Update Kubernetes deployment to use new image
-      - name: Update Deployment
-        run: |
-          echo "Setting deployment image to $IMAGE"
-          kubectl set image deployment/react-app react-app=$IMAGE
-          kubectl rollout status deployment/react-app
+      # # 7. Update Kubernetes deployment to use new image
+      # - name: Update Deployment
+      #   run: |
+      #     echo "Setting deployment image to $IMAGE"
+      #     kubectl set image deployment/react-app react-app=$IMAGE
+      #     kubectl rollout status deployment/react-app
 
-      # 8. Verify deployment
-      - name: Verify Deployment
-        run: |
-          kubectl get deploy react-app -o wide
-          kubectl get pods -o wide
-          kubectl get svc react-service
+      # # 8. Verify deployment
+      # - name: Verify Deployment
+      #   run: |
+      #     kubectl get deploy react-app -o wide
+      #     kubectl get pods -o wide
+      #     kubectl get svc react-service
